@@ -1,5 +1,5 @@
 {
-  "ban_pick": {
+  "ban-pick": {
     "path": "/Users/kdone/dev/ban_pick",
     "branch": "master",
     "pm2": "ban-pick"

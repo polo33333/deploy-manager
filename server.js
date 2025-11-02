@@ -9,6 +9,7 @@ import { exec } from "child_process";
 import crypto from "crypto";
 import url from "url";
 import https from "https";
+import http from "http";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -25,10 +26,16 @@ const CONFIG_DIR = path.join(__dirname, "config");
 const CONFIG_FILE = path.join(CONFIG_DIR, "deploy-map.json");
 
 // === Đường dẫn chứng chỉ SSL ===
-const options = {
-  key: fs.readFileSync("/Users/kdone/dev/certs/privkey.pem"),
-  cert: fs.readFileSync("/Users/kdone/dev/certs/fullchain.pem"),
-};
+const keyPath = "/Users/kdone/dev/certs/privkey.pem";
+const certPath = "/Users/kdone/dev/certs/fullchain.pem";
+let sslOptions = null;
+
+if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+  sslOptions = {
+    key: fs.readFileSync(keyPath),
+    cert: fs.readFileSync(certPath),
+  };
+}
 
 // === đảm bảo file config tồn tại ===
 if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR, { recursive: true });
@@ -132,7 +139,7 @@ app.post("/api/login", (req, res) => {
   if (username === ADMIN_USER && password === ADMIN_PASS) {
     const payload = { user: username, exp: Date.now() + 6 * 3600 * 1000 };
     const token = signJwt(payload);
-    return res.json({ token });
+    return res.json({ token, user: username });
   }
   res.status(401).json({ error: "Invalid credentials" });
 });
@@ -161,7 +168,7 @@ app.get("/api/config", (req, res) => res.json(loadDeployMap()));
 
 // === API: Thêm app (auto clone + auto port) ===
 app.post("/api/add-app", (req, res) => {
-  const { name, repo, branch = "main" } = req.body || {};
+  const { name, repo, branch = "main", pm2, startScript } = req.body || {};
   if (!name || !repo) return res.status(400).json({ error: "name, repo required" });
 
   const dest = path.join(APP_BASE, name);
@@ -170,7 +177,8 @@ app.post("/api/add-app", (req, res) => {
   // Tìm port mới
   const usedPorts = Object.values(deployMap).map(a => parseInt(a.port || 0)).filter(Boolean);
   const nextPort = Math.max(5000, ...usedPorts) + 1;
-  const pm2Name = name;
+  const pm2Name = pm2 || name;
+  const script = startScript || "npm -- start"; // Mặc định dùng `npm start`
 
   const cloneCmd = `
     mkdir -p ${APP_BASE} &&
@@ -188,14 +196,14 @@ app.post("/api/add-app", (req, res) => {
     const startCmd = `
       cd ${dest} &&
       npm install --omit=dev &&
-      PORT=${nextPort} pm2 start server.js --name ${pm2Name} --env PORT=${nextPort} ||
+      PORT=${nextPort} pm2 start ${script} --name ${pm2Name} --env PORT=${nextPort} ||
       PORT=${nextPort} pm2 restart ${pm2Name}
     `;
 
     exec(startCmd, { timeout: 10 * 60 * 1000 }, (err2) => {
       if (err2) return res.status(500).json({ error: "Start failed" });
 
-      deployMap[name] = { path: dest, repo, branch, pm2: pm2Name, port: nextPort };
+      deployMap[name] = { path: dest, repo, branch, pm2: pm2Name, port: nextPort, startScript: script };
       saveDeployMap(deployMap);
       res.json({ ok: true, name, port: nextPort });
     });
@@ -214,7 +222,7 @@ app.post("/api/deploy", (req, res) => {
     git fetch origin ${cfg.branch} &&
     git reset --hard origin/${cfg.branch} &&
     npm install --omit=dev &&
-    PORT=${cfg.port} pm2 restart ${cfg.pm2}
+    PORT=${cfg.port} pm2 restart ${cfg.pm2} -- --port=${cfg.port}
   `;
   exec(cmd, (err) => {
     if (err) return res.status(500).json({ error: "Deploy failed" });
@@ -262,7 +270,14 @@ app.get("/api/logs/:name", (req, res) => {
 });
 
 // === SERVER START ===
-https.createServer(options, app).listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ HTTPS Auto Deploy server running on ${PORT}`);
-  console.log(`Dashboard:${PORT}/dashboard/`);
-});
+if (sslOptions) {
+  https.createServer(sslOptions, app).listen(PORT, "0.0.0.0", () => {
+    console.log(`✅ HTTPS Auto Deploy server running on port ${PORT}`);
+    console.log(`   Dashboard: https://your-domain:${PORT}/dashboard/`);
+  });
+} else {
+  http.createServer(app).listen(PORT, "0.0.0.0", () => {
+    console.log(`⚠️  HTTP Auto Deploy server running on port ${PORT} (SSL certs not found)`);
+    console.log(`   Dashboard: http://localhost:${PORT}/dashboard/`);
+  });
+}

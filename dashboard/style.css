@@ -25,7 +25,7 @@ body.dark-mode {
 body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 24px; background: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
 .wrap { max-width: 1000px; margin: 0 auto; }
 .card { background: var(--card-bg); padding: 12px; margin-bottom: 12px; border-radius: 8px; box-shadow: var(--card-shadow); }
-input { padding: 6px 8px; margin-right:8px; margin-bottom:6px; background-color: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 4px; }
+input { width: -webkit-fill-available; padding: 6px 8px; margin-right:8px; margin-bottom:6px; background-color: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 4px; }
 button { padding: 6px 10px; margin-right:6px; background-color: var(--button-bg); color: var(--button-text); border: 1px solid var(--button-border); border-radius: 4px; cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: 0.6; }
 table { width: 100%; border-collapse: collapse; margin-top: 8px; }

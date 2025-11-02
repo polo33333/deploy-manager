@@ -263,6 +263,6 @@ app.get("/api/logs/:name", (req, res) => {
 
 // === SERVER START ===
 https.createServer(options, app).listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ HTTPS Auto Deploy server running on https://cam-chon.ddns.net:${PORT}`);
-  console.log(`Dashboard: https://cam-chon.ddns.net:${PORT}/dashboard/`);
+  console.log(`✅ HTTPS Auto Deploy server running on ${PORT}`);
+  console.log(`Dashboard:${PORT}/dashboard/`);
 });

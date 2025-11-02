@@ -26,8 +26,8 @@ const CONFIG_FILE = path.join(CONFIG_DIR, "deploy-map.json");
 
 // === Đường dẫn chứng chỉ SSL ===
 const options = {
-  key: fs.readFileSync("/etc/letsencrypt/live/cam-chon.ddns.net/privkey.pem"),
-  cert: fs.readFileSync("/etc/letsencrypt/live/cam-chon.ddns.net/fullchain.pem"),
+  key: fs.readFileSync("/Users/kdone/dev/certs/privkey.pem"),
+  cert: fs.readFileSync("/Users/kdone/dev/certs/fullchain.pem"),
 };
 
 // === đảm bảo file config tồn tại ===

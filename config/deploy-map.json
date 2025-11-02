@@ -8,5 +8,10 @@
     "path": "/Users/kdone/dev/another_app",
     "branch": "master",
     "pm2": "another-app"
+  },
+  "error-page": {
+    "path": "/Users/kdone/dev/error-page",
+    "branch": "main",
+    "pm2": "error-page"
   }
 }

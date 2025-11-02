@@ -1,0 +1,12 @@
+{
+  "ban_pick": {
+    "path": "/Users/kdone/dev/ban_pick",
+    "branch": "master",
+    "pm2": "ban-pick"
+  },
+  "another_app": {
+    "path": "/Users/kdone/dev/another_app",
+    "branch": "master",
+    "pm2": "another-app"
+  }
+}

@@ -1,0 +1,40 @@
+:root {
+  --bg-color: #f4f6f8;
+  --text-color: #222;
+  --card-bg: #fff;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  --border-color: #eee;
+  --input-bg: #fff;
+  --button-bg: #f0f0f0;
+  --button-text: #222;
+  --button-border: #ccc;
+}
+
+body.dark-mode {
+  --bg-color: #1a1a1a;
+  --text-color: #e0e0e0;
+  --card-bg: #2c2c2c;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  --border-color: #444;
+  --input-bg: #333;
+  --button-bg: #444;
+  --button-text: #e0e0e0;
+  --button-border: #555;
+}
+
+body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 24px; background: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
+.wrap { max-width: 1000px; margin: 0 auto; }
+.card { background: var(--card-bg); padding: 12px; margin-bottom: 12px; border-radius: 8px; box-shadow: var(--card-shadow); }
+input { padding: 6px 8px; margin-right:8px; margin-bottom:6px; background-color: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 4px; }
+button { padding: 6px 10px; margin-right:6px; background-color: var(--button-bg); color: var(--button-text); border: 1px solid var(--button-border); border-radius: 4px; cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: 0.6; }
+table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+th, td { border-bottom: 1px solid var(--border-color); padding: 8px; text-align: left; }
+.top { display:flex; justify-content:space-between; margin-bottom:8px; }
+
+.theme-toggle-button {
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-left: 10px;
+}

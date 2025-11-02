@@ -1,0 +1,16 @@
+{
+  "type": "module",
+  "name": "deploy-manager",
+  "version": "1.0.0",
+  "description": "ui for deploy manager",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "kdone",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

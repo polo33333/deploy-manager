@@ -11,6 +11,7 @@ import url from "url";
 import https from "https";
 import http from "http";
 import { fileURLToPath } from "url";
+import os from "os";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -151,6 +152,49 @@ app.use("/api", (req, res, next) => {
   next();
 });
 
+// === System Stats (auth required) ===
+app.get("/api/system-stats", (req, res) => {
+  // CPU usage calculation
+  const cpus = os.cpus();
+  let totalIdle = 0, totalTick = 0;
+  cpus.forEach(cpu => {
+    for (let type in cpu.times) {
+      totalTick += cpu.times[type];
+    }
+    totalIdle += cpu.times.idle;
+  });
+  const cpuUsage = 100 - ~~(100 * totalIdle / totalTick);
+
+  // Memory usage
+  const totalMem = os.totalmem();
+  const freeMem = os.freemem();
+  const usedMem = totalMem - freeMem;
+  const memUsagePercent = (usedMem / totalMem * 100).toFixed(1);
+
+  // System info
+  const uptime = os.uptime();
+  const loadAvg = os.loadavg();
+
+  res.json({
+    cpu: {
+      usage: cpuUsage,
+      cores: cpus.length,
+      model: cpus[0].model
+    },
+    memory: {
+      total: totalMem,
+      used: usedMem,
+      free: freeMem,
+      usagePercent: parseFloat(memUsagePercent)
+    },
+    uptime: uptime,
+    loadAvg: loadAvg,
+    platform: os.platform(),
+    hostname: os.hostname()
+  });
+});
+
+
 // === API: Danh sách PM2 ===
 app.get("/api/apps", (req, res) => {
   exec("pm2 jlist", (err, stdout) => {
@@ -267,6 +311,55 @@ app.get("/api/logs/:name", (req, res) => {
     return res.type("text/plain").send(data);
   }
   res.status(404).send("No logs found");
+});
+
+// === System Control ===
+app.post("/api/shutdown", (req, res) => {
+  exec("sudo shutdown -h now", (err) => {
+    if (err) return res.status(500).json({ error: "Shutdown failed" });
+    res.json({ ok: true, message: "Shutdown initiated" });
+  });
+});
+
+app.post("/api/reboot", (req, res) => {
+  exec("sudo reboot", (err) => {
+    if (err) return res.status(500).json({ error: "Reboot failed" });
+    res.json({ ok: true, message: "Reboot initiated" });
+  });
+});
+
+app.post("/api/update-adguard", (req, res) => {
+  const commands = `
+    echo "Pulling latest AdGuard Home image..." &&
+    docker pull adguard/adguardhome:latest &&
+    echo "Stopping AdGuard Home container..." &&
+    docker stop adguardhome &&
+    echo "Removing old container..." &&
+    docker rm adguardhome &&
+    echo "Starting new AdGuard Home container..." &&
+    docker run -d \
+      --name adguardhome \
+      -p 53:53/tcp -p 53:53/udp \
+      -p 3300:80 \
+      -v adguard_conf:/opt/adguardhome/conf \
+      -v adguard_work:/opt/adguardhome/work \
+      --restart unless-stopped \
+      adguard/adguardhome:latest &&
+    echo "Setting permissions..." &&
+    docker exec -u root adguardhome chown -R adguard:adguard /opt/adguardhome &&
+    echo "Checking version..." &&
+    docker exec adguardhome /opt/adguardhome/AdGuardHome --version
+  `;
+
+  exec(commands, { timeout: 5 * 60 * 1000 }, (err, stdout, stderr) => {
+    if (err) {
+      console.error("AdGuard update error:", err.message);
+      console.error("stderr:", stderr);
+      return res.status(500).json({ error: "AdGuard update failed", details: stderr || err.message });
+    }
+    console.log("AdGuard update output:", stdout);
+    res.json({ ok: true, message: "AdGuard Home updated successfully", output: stdout });
+  });
 });
 
 // === SERVER START ===

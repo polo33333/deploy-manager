@@ -315,15 +315,37 @@ app.get("/api/logs/:name", (req, res) => {
 
 // === System Control ===
 app.post("/api/shutdown", (req, res) => {
-  exec("sudo shutdown -h now", (err) => {
-    if (err) return res.status(500).json({ error: "Shutdown failed" });
+  // Use osascript (AppleScript) to shutdown without sudo password
+  const cmd = 'osascript -e \'tell application "System Events" to shut down\'';
+
+  exec(cmd, (err, stdout, stderr) => {
+    if (err) {
+      console.error("Shutdown error:", err.message);
+      console.error("stderr:", stderr);
+      return res.status(500).json({
+        error: "Shutdown failed",
+        details: err.message,
+        stderr: stderr
+      });
+    }
     res.json({ ok: true, message: "Shutdown initiated" });
   });
 });
 
 app.post("/api/reboot", (req, res) => {
-  exec("sudo reboot", (err) => {
-    if (err) return res.status(500).json({ error: "Reboot failed" });
+  // Use osascript (AppleScript) to restart without sudo password
+  const cmd = 'osascript -e \'tell application "System Events" to restart\'';
+
+  exec(cmd, (err, stdout, stderr) => {
+    if (err) {
+      console.error("Reboot error:", err.message);
+      console.error("stderr:", stderr);
+      return res.status(500).json({
+        error: "Reboot failed",
+        details: err.message,
+        stderr: stderr
+      });
+    }
     res.json({ ok: true, message: "Reboot initiated" });
   });
 });

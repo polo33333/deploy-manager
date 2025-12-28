@@ -31,6 +31,10 @@ const translations = {
     memoryUsage: "Memory Usage",
     cpuTemp: "CPU Temperature",
     fanSpeed: "Fan Speed",
+    networkSpeed: "Network Speed",
+    downloadSpeed: "Download",
+    uploadSpeed: "Upload",
+    connections: "Connections",
     cores: "cores",
     host: "Host",
     uptime: "Uptime",
@@ -126,6 +130,10 @@ const translations = {
     memoryUsage: "Sử Dụng Bộ Nhớ",
     cpuTemp: "Nhiệt Độ CPU",
     fanSpeed: "Tốc Độ Quạt",
+    networkSpeed: "Tốc Độ Mạng",
+    downloadSpeed: "Tải Xuống",
+    uploadSpeed: "Tải Lên",
+    connections: "Kết Nối",
     cores: "lõi",
     host: "Máy chủ",
     uptime: "Thời gian hoạt động",
@@ -397,6 +405,15 @@ createApp({
     formatTemp(temp) {
       return temp ? temp.toFixed(1) + '°C' : 'N/A';
     },
+    formatSpeed(bytesPerSec) {
+      if (!bytesPerSec || bytesPerSec === 0) return '0 KB/s';
+      const kbps = bytesPerSec / 1024;
+      if (kbps < 1024) {
+        return kbps.toFixed(2) + ' KB/s';
+      }
+      const mbps = kbps / 1024;
+      return mbps.toFixed(2) + ' MB/s';
+    },
     // --- Thêm các phương thức cho theme ---
     toggleTheme() {
       this.theme = this.theme === 'light' ? 'dark' : 'light';
@@ -525,6 +542,25 @@ createApp({
               <div class="stat-label"><i class="bi bi-fan"></i> {{ t('fanSpeed') }}</div>
               <div class="stat-value">{{ systemStats.fans[0].rpm }} RPM</div>
               <div class="stat-subtext">{{ systemStats.fans[0].label }}</div>
+            </div>
+            <div v-if="systemStats.network" class="stat-item">
+              <div class="stat-label"><i class="bi bi-speedometer"></i> {{ t('networkSpeed') }}</div>
+              <div class="stat-value" style="display: flex; flex-direction: column; gap: 4px; font-size: 0.875rem;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i class="bi bi-arrow-down-circle" style="color: var(--success-color);"></i>
+                  <span>{{ formatSpeed(systemStats.network.downloadSpeed) }}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i class="bi bi-arrow-up-circle" style="color: var(--primary-color);"></i>
+                  <span>{{ formatSpeed(systemStats.network.uploadSpeed) }}</span>
+                </div>
+              </div>
+              <div class="stat-subtext">
+                {{ systemStats.network.interface }}
+                <span v-if="systemStats.network.connections !== undefined" style="margin-left: 8px; color: var(--primary-color);">
+                  • {{ systemStats.network.connections }} {{ t('connections') }}
+                </span>
+              </div>
             </div>
           </div>
           <div v-if="systemStats" class="system-info">

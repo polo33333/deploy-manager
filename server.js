@@ -186,6 +186,33 @@ app.get("/api/system-stats", async (req, res) => {
     // Fan speed data - disabled due to platform limitations
     let fans = null;
 
+    // Network speed data
+    let network = null;
+    try {
+      const networkStats = await si.networkStats();
+      const networkConnections = await si.networkConnections();
+
+      if (networkStats && networkStats.length > 0) {
+        // Get the first active network interface
+        const activeInterface = networkStats[0];
+
+        // Count established connections
+        const establishedConnections = networkConnections.filter(
+          conn => conn.state === 'ESTABLISHED' || conn.state === 'established'
+        ).length;
+
+        network = {
+          interface: activeInterface.iface,
+          downloadSpeed: activeInterface.rx_sec || 0, // bytes per second
+          uploadSpeed: activeInterface.tx_sec || 0,    // bytes per second
+          connections: establishedConnections
+        };
+      }
+    } catch (err) {
+      // Network stats not available
+      console.error("Network stats error:", err);
+    }
+
     res.json({
       cpu: {
         usage: Math.round(cpuData.currentLoad),
@@ -200,6 +227,7 @@ app.get("/api/system-stats", async (req, res) => {
       },
       temperature: temperature,
       fans: fans,
+      network: network,
       uptime: timeData.uptime,
       loadAvg: [cpuData.avgLoad, cpuData.avgLoad, cpuData.avgLoad], // systeminformation provides avgLoad
       platform: osInfo.platform,

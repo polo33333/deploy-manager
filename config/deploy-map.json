@@ -1,4 +1,9 @@
 {
+  "deploy-manager": {
+    "path": "/Users/kdone/dev/deploy-manager",
+    "branch": "main",
+    "pm2": "deploy-manager"
+  },
   "ban-pick": {
     "path": "/Users/kdone/dev/ban_pick",
     "branch": "master",

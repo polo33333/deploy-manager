@@ -15,7 +15,7 @@ const translations = {
     loginFailed: "Login failed. Please try again.",
 
     // Header
-    appTitle: "Host: Manager",
+    appTitle: "ServerHub",
     loggedInAs: "Logged in as",
     logout: "Logout",
 
@@ -57,6 +57,7 @@ const translations = {
     gitRepo: "Git Repository URL",
     branch: "Branch",
     pm2Name: "PM2 Name (optional)",
+    pm2NameTable: "PM2 Name",
     pm2NamePlaceholder: "Leave empty to use app name",
     startScript: "Start Script (optional)",
     startScriptPlaceholder: "e.g., app.js or npm -- start",
@@ -109,7 +110,7 @@ const translations = {
     loginFailed: "Đăng nhập thất bại. Vui lòng thử lại.",
 
     // Header
-    appTitle: "Quản Lý Host",
+    appTitle: "ServerHub",
     loggedInAs: "Đã đăng nhập với tên",
     logout: "Đăng Xuất",
 
@@ -151,6 +152,7 @@ const translations = {
     gitRepo: "URL Repository Git",
     branch: "Nhánh",
     pm2Name: "Tên PM2 (tùy chọn)",
+    pm2NameTable: "Tên PM2",
     pm2NamePlaceholder: "Để trống để dùng tên ứng dụng",
     startScript: "Script Khởi Động (tùy chọn)",
     startScriptPlaceholder: "VD: app.js hoặc npm -- start",
@@ -243,6 +245,19 @@ createApp({
 
         await this.fetchApps();
         await this.fetchConfig();
+        await this.fetchSystemStats();
+
+        // Clear existing interval if any
+        if (this.statsInterval) {
+          clearInterval(this.statsInterval);
+        }
+
+        // Start auto-refresh system stats every 5 seconds
+        this.statsInterval = setInterval(() => {
+          if (this.activeTab === 'home' || this.activeTab === 'system') {
+            this.fetchSystemStats();
+          }
+        }, 5000);
       } catch (e) {
         this.loginError = e.response?.data?.error || "Login failed. Please try again.";
       } finally {
@@ -447,12 +462,19 @@ createApp({
     </div>
     <div v-else>
       <div class="top">
-        <h1>{{ t('appTitle') }}</h1>
-        <div style="display: flex; align-items: center; gap: 12px;align-items: baseline;">
-          <p style="color: var(--text-secondary); margin: 0; font-size: 0.875rem;">{{ t('loggedInAs') }} <b style="color: var(--primary-color);">{{loggedInUser}}</b></p>
-          <button @click="logout">{{ t('logout') }}</button>
-          <button @click="toggleLang" class="theme-toggle-button">{{ lang === 'vi' ? '🇬🇧 EN' : '🇻🇳 VI' }}</button>
-          <button @click="toggleTheme" class="theme-toggle-button">{{ theme === 'light' ? '🌙' : '☀️' }}</button>
+        <div class="header-left">
+          <h1>{{ t('appTitle') }}</h1>
+          <p class="user-info">{{ t('loggedInAs') }} <span class="username">{{loggedInUser}}</span></p>
+        </div>
+        <div class="header-right">
+          <button @click="toggleLang" class="icon-button" :title="lang === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'">
+            <i :class="lang === 'vi' ? 'bi bi-translate' : 'bi bi-translate'"></i>
+            <span class="lang-text">{{ lang === 'vi' ? 'EN' : 'VI' }}</span>
+          </button>
+          <button @click="toggleTheme" class="icon-button" :title="theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
+            <i :class="theme === 'light' ? 'bi bi-moon-stars' : 'bi bi-sun'"></i>
+          </button>
+          <button @click="logout" class="logout-button"><i class="bi bi-box-arrow-right"></i> {{ t('logout') }}</button>
         </div>
       </div>
 
@@ -617,12 +639,12 @@ createApp({
         <table>
           <thead>
             <tr>
-              <th>{{ t('name') }}</th>
-              <th>{{ t('status') }}</th>
-              <th>{{ t('port') }}</th>
-              <th>{{ t('pm2Name') }}</th>
-              <th>{{ t('autoRestart') }}</th>
-              <th>{{ t('actions') }}</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Port</th>
+              <th>PM2 Name</th>
+              <th>Auto Restart</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -644,13 +666,13 @@ createApp({
               </td>
               <td>{{ config[app.name]?.port || 'N/A' }}</td>
               <td>{{app.name}}</td>
-              <td>{{ app.pm2_env.autorestart ? t('yes') : t('no') }}</td>
+              <td>{{ app.pm2_env.autorestart ? 'Yes' : 'No' }}</td>
               <td>
-                <button @click="deploy(app.name)" :title="t('deployLatest')"><i class="bi bi-rocket-takeoff"></i> {{ t('deploy') }}</button>
-                <button @click="restart(app.name)" :title="t('restartApp')"><i class="bi bi-arrow-clockwise"></i> {{ t('restart') }}</button>
-                <button @click="stop(app.name)" :title="t('stopApp')"><i class="bi bi-pause-circle"></i> {{ t('stop') }}</button>
-                <button @click="viewLogs(app.name)" :title="t('viewLogs')"><i class="bi bi-file-text"></i> {{ t('logs') }}</button>
-                <button @click="remove(app.name)" :title="t('removeApp')" style="background: var(--button-danger-bg); color: white; border: none;"><i class="bi bi-trash"></i> {{ t('remove') }}</button>
+                <button @click="deploy(app.name)" title="Deploy latest changes"><i class="bi bi-rocket-takeoff"></i> Deploy</button>
+                <button @click="restart(app.name)" title="Restart application"><i class="bi bi-arrow-clockwise"></i> Restart</button>
+                <button @click="stop(app.name)" title="Stop application"><i class="bi bi-pause-circle"></i> Stop</button>
+                <button @click="viewLogs(app.name)" title="View logs"><i class="bi bi-file-text"></i> Logs</button>
+                <button @click="remove(app.name)" title="Remove application" style="background: var(--button-danger-bg); color: white; border: none;"><i class="bi bi-trash"></i> Remove</button>
               </td>
             </tr>
           </tbody>
@@ -684,6 +706,28 @@ createApp({
         </div>
         <div v-if="systemOutput" class="terminal-output">
           {{ systemOutput }}
+        </div>
+      </div>
+
+      <div class="card about-card">
+        <h3><i class="bi bi-info-circle"></i> {{ lang === 'vi' ? 'Thông Tin' : 'About' }}</h3>
+        <div class="about-content">
+          <div class="about-item">
+            <div class="about-label"><i class="bi bi-code-square"></i> {{ lang === 'vi' ? 'Phiên bản' : 'Version' }}</div>
+            <div class="about-value">v2.0.0</div>
+          </div>
+          <div class="about-item">
+            <div class="about-label"><i class="bi bi-calendar3"></i> {{ lang === 'vi' ? 'Ngày phát hành' : 'Release Date' }}</div>
+            <div class="about-value">2025-12-28</div>
+          </div>
+          <div class="about-item">
+            <div class="about-label"><i class="bi bi-person-circle"></i> {{ lang === 'vi' ? 'Phát triển bởi' : 'Developed by' }}</div>
+            <div class="about-value">KDone Team</div>
+          </div>
+          <div class="about-item">
+            <div class="about-label"><i class="bi bi-github"></i> Repository</div>
+            <div class="about-value"><a href="https://github.com/polo33333/deploy-manager" target="_blank" class="repo-link">github.com/polo33333/deploy-manager</a></div>
+          </div>
         </div>
       </div>
     </div>

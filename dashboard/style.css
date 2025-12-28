@@ -899,12 +899,6 @@ p[style*="color: red"] {
   text-decoration: underline;
 }
 
-.repo-link::before {
-  content: '→';
-  font-size: 1rem;
-  transition: transform var(--transition-fast);
-}
-
 .repo-link:hover::before {
   transform: translateX(4px);
 }

@@ -581,9 +581,15 @@ p[style*="color: red"] {
 /* System Stats */
 .stats-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .stat-item {
@@ -633,6 +639,31 @@ p[style*="color: red"] {
 }
 
 .progress-fill.danger {
+  background: linear-gradient(90deg, var(--danger-color), #dc2626);
+}
+
+/* Temperature Colors */
+.temp-normal {
+  color: var(--success-color) !important;
+}
+
+.temp-warm {
+  color: var(--warning-color) !important;
+}
+
+.temp-hot {
+  color: var(--danger-color) !important;
+}
+
+.progress-fill.temp-normal {
+  background: linear-gradient(90deg, var(--success-color), #059669);
+}
+
+.progress-fill.temp-warm {
+  background: linear-gradient(90deg, var(--warning-color), #f59e0b);
+}
+
+.progress-fill.temp-hot {
   background: linear-gradient(90deg, var(--danger-color), #dc2626);
 }
 

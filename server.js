@@ -11,7 +11,7 @@ import url from "url";
 import https from "https";
 import http from "http";
 import { fileURLToPath } from "url";
-import os from "os";
+import si from "systeminformation";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -153,45 +153,62 @@ app.use("/api", (req, res, next) => {
 });
 
 // === System Stats (auth required) ===
-app.get("/api/system-stats", (req, res) => {
-  // CPU usage calculation
-  const cpus = os.cpus();
-  let totalIdle = 0, totalTick = 0;
-  cpus.forEach(cpu => {
-    for (let type in cpu.times) {
-      totalTick += cpu.times[type];
+app.get("/api/system-stats", async (req, res) => {
+  try {
+    // Get CPU info using systeminformation
+    const cpuData = await si.currentLoad();
+    const cpuInfo = await si.cpu();
+
+    // Get Memory info using systeminformation
+    const memData = await si.mem();
+
+    // Get system info
+    const osInfo = await si.osInfo();
+    const timeData = await si.time();
+
+    // Temperature data
+    // Note: On macOS, systeminformation requires macos-temperature-sensor or osx-temperature-sensor
+    // These are installed as optionalDependencies in package.json
+    let temperature = null;
+    try {
+      const tempData = await si.cpuTemperature();
+      if (tempData.main !== null && tempData.main !== -1) {
+        temperature = {
+          main: tempData.main,
+          cores: tempData.cores || [],
+          max: tempData.max || tempData.main
+        };
+      }
+    } catch (err) {
+      // Temperature data not available on this platform
     }
-    totalIdle += cpu.times.idle;
-  });
-  const cpuUsage = 100 - ~~(100 * totalIdle / totalTick);
 
-  // Memory usage
-  const totalMem = os.totalmem();
-  const freeMem = os.freemem();
-  const usedMem = totalMem - freeMem;
-  const memUsagePercent = (usedMem / totalMem * 100).toFixed(1);
+    // Fan speed data - disabled due to platform limitations
+    let fans = null;
 
-  // System info
-  const uptime = os.uptime();
-  const loadAvg = os.loadavg();
-
-  res.json({
-    cpu: {
-      usage: cpuUsage,
-      cores: cpus.length,
-      model: cpus[0].model
-    },
-    memory: {
-      total: totalMem,
-      used: usedMem,
-      free: freeMem,
-      usagePercent: parseFloat(memUsagePercent)
-    },
-    uptime: uptime,
-    loadAvg: loadAvg,
-    platform: os.platform(),
-    hostname: os.hostname()
-  });
+    res.json({
+      cpu: {
+        usage: Math.round(cpuData.currentLoad),
+        cores: cpuInfo.cores,
+        model: cpuInfo.manufacturer + ' ' + cpuInfo.brand
+      },
+      memory: {
+        total: memData.total,
+        used: memData.used,
+        free: memData.free,
+        usagePercent: parseFloat(((memData.used / memData.total) * 100).toFixed(1))
+      },
+      temperature: temperature,
+      fans: fans,
+      uptime: timeData.uptime,
+      loadAvg: [cpuData.avgLoad, cpuData.avgLoad, cpuData.avgLoad], // systeminformation provides avgLoad
+      platform: osInfo.platform,
+      hostname: osInfo.hostname
+    });
+  } catch (error) {
+    console.error("Error fetching system stats:", error);
+    res.status(500).json({ error: "Failed to fetch system stats" });
+  }
 });
 
 

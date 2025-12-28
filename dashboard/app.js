@@ -1,9 +1,203 @@
 // app.js
 const { createApp, ref, onMounted } = Vue;
 
+// Translations
+const translations = {
+  en: {
+    // Login
+    loginTitle: "Welcome Back",
+    loginSubtitle: "Sign in to manage your applications",
+    username: "Username",
+    password: "Password",
+    rememberMe: "Remember me",
+    signIn: "Sign In",
+    loggingIn: "Logging in...",
+    loginFailed: "Login failed. Please try again.",
+
+    // Header
+    appTitle: "Host: Manager",
+    loggedInAs: "Logged in as",
+    logout: "Logout",
+
+    // Tabs
+    tabHome: "Home",
+    tabDeploy: "Deploy Apps",
+    tabSystem: "System Control",
+
+    // System Monitor
+    systemMonitor: "System Monitor",
+    systemMonitorDesc: "Real-time system resource usage",
+    cpuUsage: "CPU Usage",
+    memoryUsage: "Memory Usage",
+    cpuTemp: "CPU Temperature",
+    fanSpeed: "Fan Speed",
+    cores: "cores",
+    host: "Host",
+    uptime: "Uptime",
+    loadAvg: "Load Avg",
+    loadingStats: "Loading system stats...",
+    max: "Max",
+
+    // Applications Status
+    appsStatus: "Applications Status",
+    appsStatusDesc: "Overview of managed applications",
+    runningApps: "Running Apps",
+    totalApps: "Total Apps",
+    activeApps: "Active applications",
+    managedByPM2: "Managed by PM2",
+    statusDistribution: "Status Distribution",
+    total: "total",
+    online: "Online",
+    stopped: "Stopped",
+    other: "Other",
+
+    // Deploy Apps
+    addNewApp: "Add New Application",
+    appName: "App Name",
+    gitRepo: "Git Repository URL",
+    branch: "Branch",
+    pm2Name: "PM2 Name (optional)",
+    pm2NamePlaceholder: "Leave empty to use app name",
+    startScript: "Start Script (optional)",
+    startScriptPlaceholder: "e.g., app.js or npm -- start",
+    addDeploy: "Add & Deploy",
+    adding: "Adding...",
+
+    managedApps: "Managed Applications",
+    refresh: "Refresh",
+    name: "Name",
+    status: "Status",
+    port: "Port",
+    autoRestart: "Auto Restart",
+    actions: "Actions",
+    deploy: "Deploy",
+    restart: "Restart",
+    stop: "Stop",
+    logs: "Logs",
+    remove: "Remove",
+    yes: "Yes",
+    no: "No",
+    noApps: "No applications found. Add your first app above!",
+
+    // System Control
+    adguardHome: "AdGuard Home",
+    adguardDesc: "Update AdGuard Home to the latest version",
+    updateAdguard: "Update AdGuard Home",
+    updating: "Updating...",
+
+    hostControl: "Host Control",
+    hostControlDesc: "Control the host machine",
+    rebootHost: "Reboot Host",
+    shutdownHost: "Shutdown Host",
+
+    // Tooltips
+    deployLatest: "Deploy latest changes",
+    restartApp: "Restart application",
+    stopApp: "Stop application",
+    viewLogs: "View logs",
+    removeApp: "Remove application"
+  },
+  vi: {
+    // Login
+    loginTitle: "Chào Mừng Trở Lại",
+    loginSubtitle: "Đăng nhập để quản lý ứng dụng",
+    username: "Tên đăng nhập",
+    password: "Mật khẩu",
+    rememberMe: "Ghi nhớ đăng nhập",
+    signIn: "Đăng Nhập",
+    loggingIn: "Đang đăng nhập...",
+    loginFailed: "Đăng nhập thất bại. Vui lòng thử lại.",
+
+    // Header
+    appTitle: "Quản Lý Host",
+    loggedInAs: "Đã đăng nhập với tên",
+    logout: "Đăng Xuất",
+
+    // Tabs
+    tabHome: "Trang Chủ",
+    tabDeploy: "Triển Khai Ứng Dụng",
+    tabSystem: "Điều Khiển Hệ Thống",
+
+    // System Monitor
+    systemMonitor: "Giám Sát Hệ Thống",
+    systemMonitorDesc: "Theo dõi tài nguyên hệ thống theo thời gian thực",
+    cpuUsage: "Sử Dụng CPU",
+    memoryUsage: "Sử Dụng Bộ Nhớ",
+    cpuTemp: "Nhiệt Độ CPU",
+    fanSpeed: "Tốc Độ Quạt",
+    cores: "lõi",
+    host: "Máy chủ",
+    uptime: "Thời gian hoạt động",
+    loadAvg: "Tải trung bình",
+    loadingStats: "Đang tải thông tin hệ thống...",
+    max: "Tối đa",
+
+    // Applications Status
+    appsStatus: "Trạng Thái Ứng Dụng",
+    appsStatusDesc: "Tổng quan các ứng dụng đang quản lý",
+    runningApps: "Ứng Dụng Đang Chạy",
+    totalApps: "Tổng Số Ứng Dụng",
+    activeApps: "Ứng dụng đang hoạt động",
+    managedByPM2: "Được quản lý bởi PM2",
+    statusDistribution: "Phân Bố Trạng Thái",
+    total: "tổng",
+    online: "Đang chạy",
+    stopped: "Đã dừng",
+    other: "Khác",
+
+    // Deploy Apps
+    addNewApp: "Thêm Ứng Dụng Mới",
+    appName: "Tên Ứng Dụng",
+    gitRepo: "URL Repository Git",
+    branch: "Nhánh",
+    pm2Name: "Tên PM2 (tùy chọn)",
+    pm2NamePlaceholder: "Để trống để dùng tên ứng dụng",
+    startScript: "Script Khởi Động (tùy chọn)",
+    startScriptPlaceholder: "VD: app.js hoặc npm -- start",
+    addDeploy: "Thêm & Triển Khai",
+    adding: "Đang thêm...",
+
+    managedApps: "Ứng Dụng Đang Quản Lý",
+    refresh: "Làm Mới",
+    name: "Tên",
+    status: "Trạng Thái",
+    port: "Cổng",
+    autoRestart: "Tự Động Khởi Động Lại",
+    actions: "Thao Tác",
+    deploy: "Triển Khai",
+    restart: "Khởi Động Lại",
+    stop: "Dừng",
+    logs: "Nhật Ký",
+    remove: "Xóa",
+    yes: "Có",
+    no: "Không",
+    noApps: "Không tìm thấy ứng dụng nào. Hãy thêm ứng dụng đầu tiên!",
+
+    // System Control
+    adguardHome: "AdGuard Home",
+    adguardDesc: "Cập nhật AdGuard Home lên phiên bản mới nhất",
+    updateAdguard: "Cập Nhật AdGuard Home",
+    updating: "Đang cập nhật...",
+
+    hostControl: "Điều Khiển Máy Chủ",
+    hostControlDesc: "Điều khiển máy chủ host",
+    rebootHost: "Khởi Động Lại Máy Chủ",
+    shutdownHost: "Tắt Máy Chủ",
+
+    // Tooltips
+    deployLatest: "Triển khai phiên bản mới nhất",
+    restartApp: "Khởi động lại ứng dụng",
+    stopApp: "Dừng ứng dụng",
+    viewLogs: "Xem nhật ký",
+    removeApp: "Xóa ứng dụng"
+  }
+};
+
+
 createApp({
   data() {
     return {
+      lang: localStorage.getItem("lang") || "vi",
       theme: localStorage.getItem("theme") || "light",
       token: localStorage.getItem("token") || null,
       username: localStorage.getItem("rememberedUsername") || "",
@@ -180,6 +374,14 @@ createApp({
       if (percent >= 75) return 'warning';
       return '';
     },
+    getTempClass(temp) {
+      if (temp >= 80) return 'temp-hot';
+      if (temp >= 60) return 'temp-warm';
+      return 'temp-normal';
+    },
+    formatTemp(temp) {
+      return temp ? temp.toFixed(1) + '°C' : 'N/A';
+    },
     // --- Thêm các phương thức cho theme ---
     toggleTheme() {
       this.theme = this.theme === 'light' ? 'dark' : 'light';
@@ -192,6 +394,14 @@ createApp({
       } else {
         document.body.classList.remove('dark-mode');
       }
+    },
+    // --- Language methods ---
+    t(key) {
+      return translations[this.lang][key] || key;
+    },
+    toggleLang() {
+      this.lang = this.lang === 'vi' ? 'en' : 'vi';
+      localStorage.setItem('lang', this.lang);
     }
   },
   mounted() {
@@ -218,29 +428,30 @@ createApp({
     <div v-if="!token" class="login-container">
       <div class="card login-card">
         <div class="login-icon">🔐</div>
-        <h3>Welcome Back</h3>
-        <p class="subtitle">Sign in to manage your applications</p>
+        <h3>{{ t('loginTitle') }}</h3>
+        <p class="subtitle">{{ t('loginSubtitle') }}</p>
         <form @submit.prevent="login">
-          <input v-model="username" type="text" placeholder="Username" required @keyup.enter="login" />
-          <input v-model="password" type="password" placeholder="Password" required @keyup.enter="login" />
+          <input v-model="username" type="text" :placeholder="t('username')" required @keyup.enter="login" />
+          <input v-model="password" type="password" :placeholder="t('password')" required @keyup.enter="login" />
           <div class="remember-me">
             <input type="checkbox" id="remember-me" v-model="rememberMe" />
-            <label for="remember-me">Remember me</label>
+            <label for="remember-me">{{ t('rememberMe') }}</label>
           </div>
           <button type="submit" :disabled="loginLoading">
             <span v-if="loginLoading" class="loading"></span>
-            {{ loginLoading ? 'Logging in...' : 'Sign In' }}
+            {{ loginLoading ? t('loggingIn') : t('signIn') }}
           </button>
-          <p v-if="loginError" style="color: red; margin-top: 16px;">{{ loginError }}</p>
+          <p v-if="loginError" style="color: red; margin-top: 16px;">{{ t('loginFailed') }}</p>
         </form>
       </div>
     </div>
     <div v-else>
       <div class="top">
-        <h1>Host: Manager</h1>
+        <h1>{{ t('appTitle') }}</h1>
         <div style="display: flex; align-items: center; gap: 12px;align-items: baseline;">
-          <p style="color: var(--text-secondary); margin: 0; font-size: 0.875rem;">Logged in as <b style="color: var(--primary-color);">{{loggedInUser}}</b></p>
-          <button @click="logout">Logout</button>
+          <p style="color: var(--text-secondary); margin: 0; font-size: 0.875rem;">{{ t('loggedInAs') }} <b style="color: var(--primary-color);">{{loggedInUser}}</b></p>
+          <button @click="logout">{{ t('logout') }}</button>
+          <button @click="toggleLang" class="theme-toggle-button">{{ lang === 'vi' ? '🇬🇧 EN' : '🇻🇳 VI' }}</button>
           <button @click="toggleTheme" class="theme-toggle-button">{{ theme === 'light' ? '🌙' : '☀️' }}</button>
         </div>
       </div>
@@ -248,75 +459,88 @@ createApp({
       <!-- Tab Navigation -->
       <div class="tab-nav">
         <button class="tab-button" :class="{ active: activeTab === 'home' }" @click="activeTab = 'home'">
-          <i class="bi bi-house-door"></i> Home
+          <i class="bi bi-house-door"></i> {{ t('tabHome') }}
         </button>
         <button class="tab-button" :class="{ active: activeTab === 'deploy' }" @click="activeTab = 'deploy'">
-          <i class="bi bi-rocket-takeoff"></i> Deploy Apps
+          <i class="bi bi-rocket-takeoff"></i> {{ t('tabDeploy') }}
         </button>
         <button class="tab-button" :class="{ active: activeTab === 'system' }" @click="activeTab = 'system'">
-          <i class="bi bi-gear"></i> System Control
+          <i class="bi bi-gear"></i> {{ t('tabSystem') }}
         </button>
       </div>
 
       <!-- Home Tab -->
       <div class="tab-content" :class="{ active: activeTab === 'home' }">
         <div class="card">
-          <h3><i class="bi bi-speedometer2"></i> System Monitor</h3>
-          <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9375rem;">Real-time system resource usage</p>
+          <h3><i class="bi bi-speedometer2"></i> {{ t('systemMonitor') }}</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9375rem;">{{ t('systemMonitorDesc') }}</p>
           <div v-if="systemStats" class="stats-grid">
             <div class="stat-item">
-              <div class="stat-label"><i class="bi bi-cpu"></i> CPU Usage</div>
+              <div class="stat-label"><i class="bi bi-cpu"></i> {{ t('cpuUsage') }}</div>
               <div class="stat-value">{{ systemStats.cpu.usage }}%</div>
-              <div class="stat-subtext">{{ systemStats.cpu.cores }} cores</div>
+              <div class="stat-subtext">{{ systemStats.cpu.cores }} {{ t('cores') }}</div>
               <div class="progress-bar">
                 <div class="progress-fill" :class="getProgressClass(systemStats.cpu.usage)" :style="{ width: systemStats.cpu.usage + '%' }"></div>
               </div>
             </div>
             <div class="stat-item">
-              <div class="stat-label"><i class="bi bi-memory"></i> Memory Usage</div>
+              <div class="stat-label"><i class="bi bi-memory"></i> {{ t('memoryUsage') }}</div>
               <div class="stat-value">{{ systemStats.memory.usagePercent }}%</div>
               <div class="stat-subtext">{{ formatBytes(systemStats.memory.used) }} / {{ formatBytes(systemStats.memory.total) }}</div>
               <div class="progress-bar">
                 <div class="progress-fill" :class="getProgressClass(systemStats.memory.usagePercent)" :style="{ width: systemStats.memory.usagePercent + '%' }"></div>
               </div>
             </div>
+            <div v-if="systemStats.temperature" class="stat-item">
+              <div class="stat-label"><i class="bi bi-thermometer-half"></i> {{ t('cpuTemp') }}</div>
+              <div class="stat-value" :class="getTempClass(systemStats.temperature.main)">{{ formatTemp(systemStats.temperature.main) }}</div>
+              <div class="stat-subtext">{{ t('max') }}: {{ formatTemp(systemStats.temperature.max) }}</div>
+              <div class="progress-bar">
+                <div class="progress-fill" :class="getTempClass(systemStats.temperature.main)" :style="{ width: Math.min(systemStats.temperature.main, 100) + '%' }"></div>
+              </div>
+            </div>
+            <div v-if="systemStats.fans && systemStats.fans.length > 0" class="stat-item">
+              <div class="stat-label"><i class="bi bi-fan"></i> {{ t('fanSpeed') }}</div>
+              <div class="stat-value">{{ systemStats.fans[0].rpm }} RPM</div>
+              <div class="stat-subtext">{{ systemStats.fans[0].label }}</div>
+            </div>
           </div>
           <div v-if="systemStats" class="system-info">
             <div class="system-info-item">
-              <span class="system-info-label"><i class="bi bi-pc-display"></i> Host:</span>
+              <span class="system-info-label"><i class="bi bi-pc-display"></i> {{ t('host') }}:</span>
               <span class="system-info-value">{{ systemStats.hostname }}</span>
             </div>
             <div class="system-info-item">
-              <span class="system-info-label"><i class="bi bi-clock-history"></i> Uptime:</span>
+              <span class="system-info-label"><i class="bi bi-clock-history"></i> {{ t('uptime') }}:</span>
               <span class="system-info-value">{{ formatUptime(systemStats.uptime) }}</span>
             </div>
             <div class="system-info-item">
-              <span class="system-info-label"><i class="bi bi-graph-up"></i> Load Avg:</span>
+              <span class="system-info-label"><i class="bi bi-graph-up"></i> {{ t('loadAvg') }}:</span>
               <span class="system-info-value">{{ systemStats.loadAvg[0].toFixed(2) }}, {{ systemStats.loadAvg[1].toFixed(2) }}, {{ systemStats.loadAvg[2].toFixed(2) }}</span>
             </div>
           </div>
-          <p v-else style="text-align: center; color: var(--text-muted); padding: 24px;">Loading system stats...</p>
+          <p v-else style="text-align: center; color: var(--text-muted); padding: 24px;">{{ t('loadingStats') }}</p>
         </div>
 
         <div class="card">
-          <h3><i class="bi bi-bar-chart"></i> Applications Status</h3>
-          <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9375rem;">Overview of managed applications</p>
+          <h3><i class="bi bi-bar-chart"></i> {{ t('appsStatus') }}</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9375rem;">{{ t('appsStatusDesc') }}</p>
           <div class="stats-grid">
             <div class="stat-item">
-              <div class="stat-label"><i class="bi bi-circle-fill text-success"></i> Running Apps</div>
+              <div class="stat-label"><i class="bi bi-circle-fill text-success"></i> {{ t('runningApps') }}</div>
               <div class="stat-value">{{ apps.filter(a => a.pm2_env.status === 'online').length }}</div>
-              <div class="stat-subtext">Active applications</div>
+              <div class="stat-subtext">{{ t('activeApps') }}</div>
             </div>
             <div class="stat-item">
-              <div class="stat-label"><i class="bi bi-app"></i> Total Apps</div>
+              <div class="stat-label"><i class="bi bi-app"></i> {{ t('totalApps') }}</div>
               <div class="stat-value">{{ apps.length }}</div>
-              <div class="stat-subtext">Managed by PM2</div>
+              <div class="stat-subtext">{{ t('managedByPM2') }}</div>
             </div>
           </div>
           <div style="margin-top: 16px; padding: 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <span style="font-weight: 600; color: var(--text-color);">Status Distribution</span>
-              <span style="font-size: 0.875rem; color: var(--text-secondary);">{{ apps.length }} total</span>
+              <span style="font-weight: 600; color: var(--text-color);">{{ t('statusDistribution') }}</span>
+              <span style="font-size: 0.875rem; color: var(--text-secondary);">{{ apps.length }} {{ t('total') }}</span>
             </div>
             <div style="display: flex; gap: 8px; height: 40px;">
               <div v-if="apps.filter(a => a.pm2_env.status === 'online').length > 0" 
@@ -335,15 +559,15 @@ createApp({
             <div style="display: flex; gap: 16px; margin-top: 12px; font-size: 0.875rem;">
               <div style="display: flex; align-items: center; gap: 6px;">
                 <div style="width: 12px; height: 12px; background: var(--success-color); borderRadius: '50%';"></div>
-                <span style="color: var(--text-secondary);">Online: {{ apps.filter(a => a.pm2_env.status === 'online').length }}</span>
+                <span style="color: var(--text-secondary);">{{ t('online') }}: {{ apps.filter(a => a.pm2_env.status === 'online').length }}</span>
               </div>
               <div style="display: flex; align-items: center; gap: 6px;">
                 <div style="width: 12px; height: 12px; background: var(--danger-color); borderRadius: '50%';"></div>
-                <span style="color: var(--text-secondary);">Stopped: {{ apps.filter(a => a.pm2_env.status === 'stopped').length }}</span>
+                <span style="color: var(--text-secondary);">{{ t('stopped') }}: {{ apps.filter(a => a.pm2_env.status === 'stopped').length }}</span>
               </div>
               <div v-if="apps.filter(a => a.pm2_env.status !== 'online' && a.pm2_env.status !== 'stopped').length > 0" style="display: flex; align-items: center; gap: 6px;">
                 <div style="width: 12px; height: 12px; background: var(--warning-color); borderRadius: '50%';"></div>
-                <span style="color: var(--text-secondary);">Other: {{ apps.filter(a => a.pm2_env.status !== 'online' && a.pm2_env.status !== 'stopped').length }}</span>
+                <span style="color: var(--text-secondary);">{{ t('other') }}: {{ apps.filter(a => a.pm2_env.status !== 'online' && a.pm2_env.status !== 'stopped').length }}</span>
               </div>
             </div>
           </div>
@@ -354,51 +578,51 @@ createApp({
       <div class="tab-content" :class="{ active: activeTab === 'deploy' }">
 
       <div class="card">
-        <h3><i class="bi bi-plus-circle"></i> Add New Application</h3>
+        <h3><i class="bi bi-plus-circle"></i> {{ t('addNewApp') }}</h3>
         <div class="form-row">
           <div class="form-group">
-            <label for="form-name">App Name</label>
-            <input id="form-name" v-model="form.name" placeholder="my-awesome-app" />
+            <label for="form-name">{{ t('appName') }}</label>
+            <input id="form-name" v-model="form.name" :placeholder="t('appName')" />
           </div>
           <div class="form-group">
-            <label for="form-repo">Git Repository URL</label>
-            <input id="form-repo" v-model="form.repo" placeholder="https://github.com/username/repo.git" />
+            <label for="form-repo">{{ t('gitRepo') }}</label>
+            <input id="form-repo" v-model="form.repo" :placeholder="t('gitRepo')" />
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="form-branch">Branch</label>
-            <input id="form-branch" v-model="form.branch" placeholder="main" />
+            <label for="form-branch">{{ t('branch') }}</label>
+            <input id="form-branch" v-model="form.branch" :placeholder="t('branch')" />
           </div>
           <div class="form-group">
-            <label for="form-pm2">PM2 Name (optional)</label>
-            <input id="form-pm2" v-model="form.pm2" placeholder="Leave empty to use app name" />
+            <label for="form-pm2">{{ t('pm2Name') }}</label>
+            <input id="form-pm2" v-model="form.pm2" :placeholder="t('pm2NamePlaceholder')" />
           </div>
         </div>
         <div class="form-group">
-          <label for="form-start-script">Start Script (optional)</label>
-          <input id="form-start-script" v-model="form.startScript" placeholder="e.g., app.js or npm -- start" />
+          <label for="form-start-script">{{ t('startScript') }}</label>
+          <input id="form-start-script" v-model="form.startScript" :placeholder="t('startScriptPlaceholder')" />
         </div>
         <button @click="addApp" :disabled="loading">
           <span v-if="loading" class="loading"></span>
-          <i class="bi bi-rocket-takeoff"></i> {{ loading ? 'Adding...' : 'Add & Deploy' }}
+          <i class="bi bi-rocket-takeoff"></i> {{ loading ? t('adding') : t('addDeploy') }}
         </button>
       </div>
 
       <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <h3 style="margin: 0;"><i class="bi bi-boxes"></i> Managed Applications</h3>
-          <button @click="fetchApps"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+          <h3 style="margin: 0;"><i class="bi bi-boxes"></i> {{ t('managedApps') }}</h3>
+          <button @click="fetchApps"><i class="bi bi-arrow-clockwise"></i> {{ t('refresh') }}</button>
         </div>
         <table>
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Status</th>
-              <th>Port</th>
-              <th>PM2 Name</th>
-              <th>Auto Restart</th>
-              <th>Actions</th>
+              <th>{{ t('name') }}</th>
+              <th>{{ t('status') }}</th>
+              <th>{{ t('port') }}</th>
+              <th>{{ t('pm2Name') }}</th>
+              <th>{{ t('autoRestart') }}</th>
+              <th>{{ t('actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -420,19 +644,19 @@ createApp({
               </td>
               <td>{{ config[app.name]?.port || 'N/A' }}</td>
               <td>{{app.name}}</td>
-              <td>{{ app.pm2_env.autorestart ? 'Yes' : 'No' }}</td>
+              <td>{{ app.pm2_env.autorestart ? t('yes') : t('no') }}</td>
               <td>
-                <button @click="deploy(app.name)" title="Deploy latest changes"><i class="bi bi-rocket-takeoff"></i> Deploy</button>
-                <button @click="restart(app.name)" title="Restart application"><i class="bi bi-arrow-clockwise"></i> Restart</button>
-                <button @click="stop(app.name)" title="Stop application"><i class="bi bi-pause-circle"></i> Stop</button>
-                <button @click="viewLogs(app.name)" title="View logs"><i class="bi bi-file-text"></i> Logs</button>
-                <button @click="remove(app.name)" title="Remove application" style="background: var(--button-danger-bg); color: white; border: none;"><i class="bi bi-trash"></i> Remove</button>
+                <button @click="deploy(app.name)" :title="t('deployLatest')"><i class="bi bi-rocket-takeoff"></i> {{ t('deploy') }}</button>
+                <button @click="restart(app.name)" :title="t('restartApp')"><i class="bi bi-arrow-clockwise"></i> {{ t('restart') }}</button>
+                <button @click="stop(app.name)" :title="t('stopApp')"><i class="bi bi-pause-circle"></i> {{ t('stop') }}</button>
+                <button @click="viewLogs(app.name)" :title="t('viewLogs')"><i class="bi bi-file-text"></i> {{ t('logs') }}</button>
+                <button @click="remove(app.name)" :title="t('removeApp')" style="background: var(--button-danger-bg); color: white; border: none;"><i class="bi bi-trash"></i> {{ t('remove') }}</button>
               </td>
             </tr>
           </tbody>
         </table>
         <p v-if="apps.length === 0" style="text-align: center; color: var(--text-muted); margin-top: 24px; font-style: italic;">
-          <i class="bi bi-inbox"></i> No applications found. Add your first app above!
+          <i class="bi bi-inbox"></i> {{ t('noApps') }}
         </p>
       </div>
     </div>
@@ -440,11 +664,11 @@ createApp({
     <!-- System Control Tab -->
     <div class="tab-content" :class="{ active: activeTab === 'system' }">
       <div class="card">
-        <h3><i class="bi bi-shield-check"></i> AdGuard Home</h3>
-        <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9375rem;">Update AdGuard Home to the latest version</p>
+        <h3><i class="bi bi-shield-check"></i> {{ t('adguardHome') }}</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9375rem;">{{ t('adguardDesc') }}</p>
         <button @click="updateAdguard" :disabled="adguardLoading" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none;">
           <span v-if="adguardLoading" class="loading"></span>
-          <i class="bi bi-arrow-repeat"></i> {{ adguardLoading ? 'Updating...' : 'Update AdGuard Home' }}
+          <i class="bi bi-arrow-repeat"></i> {{ adguardLoading ? t('updating') : t('updateAdguard') }}
         </button>
         <div v-if="adguardOutput" class="terminal-output">
           {{ adguardOutput }}
@@ -452,11 +676,11 @@ createApp({
       </div>
 
       <div class="card">
-        <h3><i class="bi bi-gear"></i> Host Control</h3>
-        <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9375rem;">Control the host machine</p>
+        <h3><i class="bi bi-gear"></i> {{ t('hostControl') }}</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9375rem;">{{ t('hostControlDesc') }}</p>
         <div class="system-btn-group">
-          <button @click="reboot" style="background: var(--warning-color); color: white; border: none;"><i class="bi bi-arrow-repeat"></i> Reboot Host</button>
-          <button @click="shutdown" style="background: var(--button-danger-bg); color: white; border: none;"><i class="bi bi-power"></i> Shutdown Host</button>
+          <button @click="reboot" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none;"><i class="bi bi-arrow-repeat"></i> {{ t('rebootHost') }}</button>
+          <button @click="shutdown" style="background: var(--button-danger-bg); color: white; border: none;"><i class="bi bi-power"></i> {{ t('shutdownHost') }}</button>
         </div>
         <div v-if="systemOutput" class="terminal-output">
           {{ systemOutput }}

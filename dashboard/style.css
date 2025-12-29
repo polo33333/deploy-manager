@@ -332,7 +332,8 @@ button:disabled {
 
 /* Primary Button */
 button[type="submit"],
-.card>button:first-of-type {
+.card>button:first-of-type,
+.btn-primary {
   background: var(--button-primary-bg);
   color: white;
   border: none;
@@ -340,7 +341,8 @@ button[type="submit"],
 }
 
 button[type="submit"]:hover:not(:disabled),
-.card>button:first-of-type:hover:not(:disabled) {
+.card>button:first-of-type:hover:not(:disabled),
+.btn-primary:hover:not(:disabled) {
   box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
 }
 

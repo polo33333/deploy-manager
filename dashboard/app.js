@@ -23,7 +23,7 @@ const translations = {
     // Tabs
     tabHome: "Home",
     tabDeploy: "Deploy Apps",
-    tabSystem: "System Control",
+    tabSystem: "System",
     tabAbout: "About",
 
     // System Monitor
@@ -124,7 +124,7 @@ const translations = {
     // Tabs
     tabHome: "Trang Chủ",
     tabDeploy: "Triển Khai Ứng Dụng",
-    tabSystem: "Điều Khiển Hệ Thống",
+    tabSystem: "Hệ Thống",
     tabAbout: "Thông Tin",
 
     // System Monitor
@@ -283,14 +283,27 @@ createApp({
         this.loginLoading = false;
       }
     },
-    logout() {
-      if (!confirm(this.t('logoutConfirm'))) return;
+    // Manual logout with confirmation
+    handleLogout() {
+      if (!confirm(this.t('logoutConfirm'))) {
+        return; // User cancelled logout
+      }
+      this.doLogout();
+    },
+    // Internal logout function (used for both manual and auto logout)
+    doLogout() {
       this.token = null;
       this.loggedInUser = "";
-      this.username = "";
       this.password = "";
       localStorage.removeItem("token");
       localStorage.removeItem("username");
+
+      // Restore username from rememberMe if enabled
+      if (this.rememberMe && localStorage.getItem("rememberedUsername")) {
+        this.username = localStorage.getItem("rememberedUsername");
+      } else {
+        this.username = "";
+      }
     },
     async fetchApps() {
       if (!this.token) return;
@@ -298,7 +311,7 @@ createApp({
         const r = await axios.get("/api/apps", { headers: this.authHeader() });
         this.apps = r.data;
       } catch (e) {
-        if (e.response?.status === 401) this.logout();
+        if (e.response?.status === 401) this.doLogout();
         console.error("Failed to fetch apps:", e);
       }
     },
@@ -308,7 +321,7 @@ createApp({
         const r = await axios.get("/api/config", { headers: this.authHeader() });
         this.config = r.data;
       } catch (e) {
-        if (e.response?.status === 401) this.logout();
+        if (e.response?.status === 401) this.doLogout();
         console.error("Failed to fetch config:", e);
       }
     },
@@ -505,7 +518,7 @@ createApp({
           <button @click="toggleTheme" class="icon-button" :title="theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
             <i :class="theme === 'light' ? 'bi bi-moon-stars' : 'bi bi-sun'"></i>
           </button>
-          <button @click="logout" class="logout-button"><i class="bi bi-box-arrow-right"></i> {{ t('logout') }}</button>
+          <button @click="handleLogout" class="logout-button"><i class="bi bi-box-arrow-right"></i> {{ t('logout') }}</button>
         </div>
       </div>
 
@@ -705,10 +718,12 @@ createApp({
           <label for="form-start-script">{{ t('startScript') }}</label>
           <input id="form-start-script" v-model="form.startScript" :placeholder="t('startScriptPlaceholder')" />
         </div>
-        <button @click="addApp" :disabled="loading">
-          <span v-if="loading" class="loading"></span>
-          <i class="bi bi-rocket-takeoff"></i> {{ loading ? t('adding') : t('addDeploy') }}
-        </button>
+        <div style="text-align: right;">
+          <button class="btn-primary" @click="addApp" :disabled="loading">
+            <span v-if="loading" class="loading"></span>
+            <i class="bi bi-rocket-takeoff"></i> {{ loading ? t('adding') : t('addDeploy') }}
+          </button>
+        </div>
       </div>
 
       <div class="card">

@@ -2,21 +2,25 @@
   "deploy-manager": {
     "path": "/Users/kdone/dev/deploy-manager",
     "branch": "main",
-    "pm2": "deploy-manager"
+    "pm2": "deploy-manager",
+    "port": 5000
   },
   "ban-pick": {
     "path": "/Users/kdone/dev/ban_pick",
     "branch": "master",
-    "pm2": "ban-pick"
+    "pm2": "ban-pick",
+    "port": 4000
   },
   "another_app": {
     "path": "/Users/kdone/dev/another_app",
     "branch": "master",
-    "pm2": "another-app"
+    "pm2": "another-app",
+    "port": 3000
   },
   "error-page": {
     "path": "/Users/kdone/dev/error-page",
     "branch": "main",
-    "pm2": "error-page"
+    "pm2": "error-page",
+    "port": 4100
   }
 }

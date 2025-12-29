@@ -13,6 +13,7 @@ const translations = {
     signIn: "Sign In",
     loggingIn: "Logging in...",
     loginFailed: "Login failed. Please try again.",
+    logoutConfirm: "Are you sure you want to logout?",
 
     // Header
     appTitle: "ServerHub",
@@ -23,6 +24,7 @@ const translations = {
     tabHome: "Home",
     tabDeploy: "Deploy Apps",
     tabSystem: "System Control",
+    tabAbout: "About",
 
     // System Monitor
     systemMonitor: "System Monitor",
@@ -112,6 +114,7 @@ const translations = {
     signIn: "Đăng Nhập",
     loggingIn: "Đang đăng nhập...",
     loginFailed: "Đăng nhập thất bại. Vui lòng thử lại.",
+    logoutConfirm: "Bạn có chắc chắn muốn đăng xuất?",
 
     // Header
     appTitle: "ServerHub",
@@ -122,6 +125,7 @@ const translations = {
     tabHome: "Trang Chủ",
     tabDeploy: "Triển Khai Ứng Dụng",
     tabSystem: "Điều Khiển Hệ Thống",
+    tabAbout: "Thông Tin",
 
     // System Monitor
     systemMonitor: "Giám Sát Hệ Thống",
@@ -210,7 +214,7 @@ createApp({
       lang: localStorage.getItem("lang") || "vi",
       theme: localStorage.getItem("theme") || "light",
       token: localStorage.getItem("token") || null,
-      username: localStorage.getItem("rememberedUsername") || "",
+      username: localStorage.getItem("rememberMe") === "true" ? (localStorage.getItem("rememberedUsername") || "") : "",
       password: "",
       rememberMe: localStorage.getItem("rememberMe") === "true",
       loggedInUser: localStorage.getItem("username") || "",
@@ -220,6 +224,7 @@ createApp({
       loading: false,
       loginLoading: false,
       loginError: null,
+      initialLoading: false,
       adguardLoading: false,
       adguardOutput: "",
       activeTab: "home",
@@ -251,9 +256,15 @@ createApp({
           localStorage.removeItem("rememberedUsername");
         }
 
+        // Show initial loading
+        this.initialLoading = true;
+
         await this.fetchApps();
         await this.fetchConfig();
         await this.fetchSystemStats();
+
+        // Hide initial loading
+        this.initialLoading = false;
 
         // Clear existing interval if any
         if (this.statsInterval) {
@@ -273,6 +284,7 @@ createApp({
       }
     },
     logout() {
+      if (!confirm(this.t('logoutConfirm'))) return;
       this.token = null;
       this.loggedInUser = "";
       this.username = "";
@@ -436,12 +448,14 @@ createApp({
       localStorage.setItem('lang', this.lang);
     }
   },
-  mounted() {
+  async mounted() {
     this.applyTheme(); // Áp dụng theme khi tải trang
     if (this.token && this.loggedInUser) {
-      this.fetchApps();
-      this.fetchConfig();
-      this.fetchSystemStats();
+      this.initialLoading = true;
+      await this.fetchApps();
+      await this.fetchConfig();
+      await this.fetchSystemStats();
+      this.initialLoading = false;
       // Auto-refresh system stats every 5 seconds
       this.statsInterval = setInterval(() => {
         if (this.activeTab === 'home' || this.activeTab === 'system') {
@@ -506,6 +520,9 @@ createApp({
         <button class="tab-button" :class="{ active: activeTab === 'system' }" @click="activeTab = 'system'">
           <i class="bi bi-gear"></i> {{ t('tabSystem') }}
         </button>
+        <button class="tab-button" :class="{ active: activeTab === 'about' }" @click="activeTab = 'about'">
+          <i class="bi bi-info-circle"></i> {{ t('tabAbout') }}
+        </button>
       </div>
 
       <!-- Home Tab -->
@@ -513,7 +530,17 @@ createApp({
         <div class="card">
           <h3><i class="bi bi-speedometer2"></i> {{ t('systemMonitor') }}</h3>
           <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9375rem;">{{ t('systemMonitorDesc') }}</p>
-          <div v-if="systemStats" class="stats-grid">
+          
+          <!-- Skeleton Loading for System Stats -->
+          <div v-if="initialLoading" class="stats-grid">
+            <div class="skeleton skeleton-stat"></div>
+            <div class="skeleton skeleton-stat"></div>
+            <div class="skeleton skeleton-stat"></div>
+            <div class="skeleton skeleton-stat"></div>
+          </div>
+          
+          <!-- Actual System Stats -->
+          <div v-else-if="systemStats" class="stats-grid">
             <div class="stat-item">
               <div class="stat-label"><i class="bi bi-cpu"></i> {{ t('cpuUsage') }}</div>
               <div class="stat-value">{{ systemStats.cpu.usage }}%</div>
@@ -532,10 +559,10 @@ createApp({
             </div>
             <div v-if="systemStats.temperature" class="stat-item">
               <div class="stat-label"><i class="bi bi-thermometer-half"></i> {{ t('cpuTemp') }}</div>
-              <div class="stat-value" :class="getTempClass(systemStats.temperature.main)">{{ formatTemp(systemStats.temperature.main) }}</div>
+              <div class="stat-value" :class="getTempClass(systemStats.temperature.max)">{{ formatTemp(systemStats.temperature.max) }}</div>
               <div class="stat-subtext">{{ t('max') }}: {{ formatTemp(systemStats.temperature.max) }}</div>
               <div class="progress-bar">
-                <div class="progress-fill" :class="getTempClass(systemStats.temperature.main)" :style="{ width: Math.min(systemStats.temperature.main, 100) + '%' }"></div>
+                <div class="progress-fill" :class="getTempClass(systemStats.temperature.max)" :style="{ width: Math.min(systemStats.temperature.max, 100) + '%' }"></div>
               </div>
             </div>
             <div v-if="systemStats.fans && systemStats.fans.length > 0" class="stat-item">
@@ -548,10 +575,12 @@ createApp({
               <div class="stat-value" style="display: flex; flex-direction: column; gap: 4px; font-size: 0.875rem;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <i class="bi bi-arrow-down-circle" style="color: var(--success-color);"></i>
+                  <span style="min-width: 50px;">{{ t('downloadSpeed') }}:</span>
                   <span>{{ formatSpeed(systemStats.network.downloadSpeed) }}</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <i class="bi bi-arrow-up-circle" style="color: var(--primary-color);"></i>
+                  <span style="min-width: 50px;">{{ t('uploadSpeed') }}:</span>
                   <span>{{ formatSpeed(systemStats.network.uploadSpeed) }}</span>
                 </div>
               </div>
@@ -563,7 +592,15 @@ createApp({
               </div>
             </div>
           </div>
-          <div v-if="systemStats" class="system-info">
+          
+          <!-- Skeleton Loading for System Info -->
+          <div v-if="initialLoading" style="margin-top: 16px;">
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text" style="width: 70%;"></div>
+          </div>
+          
+          <!-- Actual System Info -->
+          <div v-else-if="systemStats" class="system-info">
             <div class="system-info-item">
               <span class="system-info-label"><i class="bi bi-pc-display"></i> {{ t('host') }}:</span>
               <span class="system-info-value">{{ systemStats.hostname }}</span>
@@ -577,13 +614,20 @@ createApp({
               <span class="system-info-value">{{ systemStats.loadAvg[0].toFixed(2) }}, {{ systemStats.loadAvg[1].toFixed(2) }}, {{ systemStats.loadAvg[2].toFixed(2) }}</span>
             </div>
           </div>
-          <p v-else style="text-align: center; color: var(--text-muted); padding: 24px;">{{ t('loadingStats') }}</p>
         </div>
 
         <div class="card">
           <h3><i class="bi bi-bar-chart"></i> {{ t('appsStatus') }}</h3>
           <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9375rem;">{{ t('appsStatusDesc') }}</p>
-          <div class="stats-grid">
+          
+          <!-- Skeleton Loading for Apps Status -->
+          <div v-if="initialLoading" class="stats-grid">
+            <div class="skeleton skeleton-stat"></div>
+            <div class="skeleton skeleton-stat"></div>
+          </div>
+          
+          <!-- Actual Apps Status -->
+          <div v-else class="stats-grid">
             <div class="stat-item">
               <div class="stat-label"><i class="bi bi-circle-fill text-success"></i> {{ t('runningApps') }}</div>
               <div class="stat-value">{{ apps.filter(a => a.pm2_env.status === 'online').length }}</div>
@@ -745,6 +789,10 @@ createApp({
         </div>
       </div>
 
+    </div>
+
+    <!-- About Tab -->
+    <div class="tab-content" :class="{ active: activeTab === 'about' }">
       <div class="card about-card">
         <h3><i class="bi bi-info-circle"></i> {{ lang === 'vi' ? 'Thông Tin' : 'About' }}</h3>
         <div class="about-content">
@@ -766,7 +814,6 @@ createApp({
           </div>
         </div>
       </div>
-    </div>
     </div>
   </div>
   `

@@ -196,16 +196,21 @@ app.get("/api/system-stats", async (req, res) => {
         // Get the first active network interface
         const activeInterface = networkStats[0];
 
-        // Count established connections
         const establishedConnections = networkConnections.filter(
           conn => conn.state === 'ESTABLISHED' || conn.state === 'established'
-        ).length;
+        );
 
         network = {
           interface: activeInterface.iface,
           downloadSpeed: activeInterface.rx_sec || 0, // bytes per second
           uploadSpeed: activeInterface.tx_sec || 0,    // bytes per second
-          connections: establishedConnections
+          connections: establishedConnections.length,
+          connectionsList: establishedConnections.map(c => ({
+            local: `${c.localAddress}:${c.localPort}`,
+            peer: `${c.peerAddress}:${c.peerPort}`,
+            state: c.state,
+            process: c.process || ''
+          }))
         };
       }
     } catch (err) {

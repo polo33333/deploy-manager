@@ -42,6 +42,12 @@ const translations = {
         loadAvg: "Load Avg",
         loadingStats: "Loading system stats...",
         max: "Max",
+        show: "Show",
+        hide: "Hide",
+        localAddress: "Local Address",
+        remoteAddress: "Remote Address",
+        process: "Process",
+        noConnections: "No active connections",
 
         // Applications Status
         appsStatus: "Applications Status",
@@ -143,6 +149,12 @@ const translations = {
         loadAvg: "Tải trung bình",
         loadingStats: "Đang tải thông tin hệ thống...",
         max: "Tối đa",
+        show: "Hiển thị",
+        hide: "Ẩn",
+        localAddress: "Địa chỉ nội bộ",
+        remoteAddress: "Địa chỉ từ xa",
+        process: "Tiến trình",
+        noConnections: "Không có kết nối nào",
 
         // Applications Status
         appsStatus: "Trạng Thái Ứng Dụng",

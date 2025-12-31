@@ -24,6 +24,7 @@ createApp({
       activeTab: "home",
       systemOutput: "",
       systemStats: null,
+      showConnections: false,
       statsInterval: null,
     };
   },
@@ -396,7 +397,40 @@ createApp({
                 <span v-if="systemStats.network.connections !== undefined" style="margin-left: 8px; color: var(--primary-color);">
                   • {{ systemStats.network.connections }} {{ t('connections') }}
                 </span>
+                <a href="#" @click.prevent="showConnections = !showConnections" style="margin-left: 8px; text-decoration: none; font-size: 0.85em; color: var(--text-secondary);">
+                  [{{ showConnections ? t('hide') : t('show') }}]
+                </a>
               </div>
+            </div>
+          </div>
+          
+          <!-- Network Connections Table -->
+          <div v-if="showConnections && systemStats && systemStats.network && systemStats.network.connectionsList" class="card" style="margin-top: 16px; padding: 16px;">
+            <h4 style="margin-bottom: 12px; font-size: 1rem;"><i class="bi bi-diagram-3"></i> {{ t('connections') }}</h4>
+            <div style="overflow-x: auto; max-height: 400px; overflow-y: auto;">
+              <table style="width: 100%; font-size: 0.85rem;">
+                <thead>
+                  <tr>
+                    <th>{{ t('localAddress') }}</th>
+                    <th>{{ t('remoteAddress') }}</th>
+                    <th>{{ t('process') }}</th>
+                    <th>{{ t('status') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(conn, idx) in systemStats.network.connectionsList" :key="idx">
+                    <td><code>{{ conn.local }}</code></td>
+                    <td><code>{{ conn.peer }}</code></td>
+                    <td>{{ conn.process }}</td>
+                    <td><span class="status-badge status-online" style="font-size: 0.7em;">{{ conn.state }}</span></td>
+                  </tr>
+                  <tr v-if="!systemStats.network.connectionsList.length">
+                    <td colspan="4" style="text-align: center; font-style: italic; color: var(--text-muted);">
+                      {{ t('noConnections') }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
           

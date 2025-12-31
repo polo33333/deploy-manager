@@ -15,7 +15,7 @@
     "path": "/Users/kdone/dev/happy-new-year",
     "branch": "main",
     "pm2": "happy-new-year",
-    "port": 4200
+    "port": 4100
   },
   "another_app": {
     "path": "/Users/kdone/dev/another_app",

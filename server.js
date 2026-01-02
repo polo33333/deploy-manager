@@ -27,17 +27,17 @@ const CONFIG_DIR = path.join(__dirname, "config");
 const CONFIG_FILE = path.join(CONFIG_DIR, "deploy-map.json");
 
 // === Đường dẫn chứng chỉ SSL ===
-const keyPath = "/etc/letsencrypt/live/cam-chon.ddns.net/privkey.pem";
-const certPath = "/etc/letsencrypt/live/cam-chon.ddns.net/fullchain.pem";
+// const keyPath = "/etc/letsencrypt/live/cam-chon.ddns.net/privkey.pem";
+// const certPath = "/etc/letsencrypt/live/cam-chon.ddns.net/fullchain.pem";
 
-let sslOptions = null;
+// let sslOptions = null;
 
-if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
-  sslOptions = {
-    key: fs.readFileSync(keyPath),
-    cert: fs.readFileSync(certPath),
-  };
-}
+// if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+//   sslOptions = {
+//     key: fs.readFileSync(keyPath),
+//     cert: fs.readFileSync(certPath),
+//   };
+// }
 
 // === đảm bảo file config tồn tại ===
 if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR, { recursive: true });
@@ -436,14 +436,20 @@ app.post("/api/update-adguard", (req, res) => {
 });
 
 // === SERVER START ===
-if (sslOptions) {
-  https.createServer(sslOptions, app).listen(PORT, "0.0.0.0", () => {
-    console.log(`✅ HTTPS Auto Deploy server running on port ${PORT}`);
-    console.log(`   Dashboard: https://your-domain:${PORT}/dashboard/`);
-  });
-} else {
-  http.createServer(app).listen(PORT, "0.0.0.0", () => {
-    console.log(`⚠️  HTTP Auto Deploy server running on port ${PORT} (SSL certs not found)`);
-    console.log(`   Dashboard: http://localhost:${PORT}/dashboard/`);
-  });
-}
+// if (sslOptions) {
+//   https.createServer(sslOptions, app).listen(PORT, "0.0.0.0", () => {
+//     console.log(`✅ HTTPS Auto Deploy server running on port ${PORT}`);
+//     console.log(`   Dashboard: https://your-domain:${PORT}/dashboard/`);
+//   });
+// } else {
+//   http.createServer(app).listen(PORT, "0.0.0.0", () => {
+//     console.log(`⚠️  HTTP Auto Deploy server running on port ${PORT} (SSL certs not found)`);
+//     console.log(`   Dashboard: http://localhost:${PORT}/dashboard/`);
+//   });
+// }
+
+
+
+http.createServer(app).listen(5000, "127.0.0.1", () => {
+  console.log("✅ HTTP Auto Deploy server running on port 5000");
+});

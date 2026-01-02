@@ -100,6 +100,7 @@ function verifyGitHubSignature(reqBodyRaw, signature) {
 
 // === EXPRESS APP ===
 const app = express();
+app.set("trust proxy", true);
 const server = http.createServer(app);
 app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));

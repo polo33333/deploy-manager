@@ -27,8 +27,8 @@ const CONFIG_DIR = path.join(__dirname, "config");
 const CONFIG_FILE = path.join(CONFIG_DIR, "deploy-map.json");
 
 // === Đường dẫn chứng chỉ SSL ===
-const keyPath = "/etc/letsencrypt/live/cam-chon.ddns.net/privkey.pem";
-const certPath = "/etc/letsencrypt/live/cam-chon.ddns.net/fullchain.pem";
+const keyPath = "/Users/kdone/ssl/privkey.pem";
+const certPath = "/Users/kdone/ssl/fullchain.pem";
 
 let sslOptions = null;
 

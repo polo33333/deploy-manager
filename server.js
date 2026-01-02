@@ -17,6 +17,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PORT = 5000;
+
+
 const GITHUB_SECRET = "abc123"; // optional
 const ADMIN_USER = "admin";
 const ADMIN_PASS = "12345678.c"; // ĐỔI NGAY
@@ -98,6 +100,7 @@ function verifyGitHubSignature(reqBodyRaw, signature) {
 
 // === EXPRESS APP ===
 const app = express();
+const server = http.createServer(app);
 app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -450,6 +453,6 @@ app.post("/api/update-adguard", (req, res) => {
 
 
 
-http.createServer(app).listen(5000, "127.0.0.1", () => {
-  console.log("✅ HTTP Auto Deploy server running on port 5000");
-});
+server.listen(PORT, () =>
+  console.log(`Draft server running on http://localhost:${PORT}`)
+);
